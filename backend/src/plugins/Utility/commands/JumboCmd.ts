@@ -31,8 +31,6 @@ function resizeBuffer(input: Buffer, width: number, height: number): Buffer {
   return photonImageToBuffer(photonImage);
 }
 
-const CDN_URL = "https://twemoji.maxcdn.com/";
-
 export const JumboCmd = utilityCmd({
   trigger: "jumbo",
   description: "Makes an emoji jumbo",
@@ -75,11 +73,17 @@ export const JumboCmd = utilityCmd({
       let image: Buffer | undefined;
       try {
         const downloadedBuffer = await getBufferFromUrl(url);
-        image = resizeBuffer(await getBufferFromUrl(url), size, size);
+        image = resizeBuffer(downloadedBuffer, size, size);
       } catch (err) {
         if (url.toLocaleLowerCase().endsWith("fe0f.png")) {
           url = url.slice(0, url.lastIndexOf("-fe0f")) + ".png";
-          image = await resizeBuffer(await getBufferFromUrl(url), size, size);
+          try {
+            image = resizeBuffer(await getBufferFromUrl(url), size, size);
+          } catch {
+            // It's fine if this fails, we just don't jumbo then.
+            // The errors here are usually some internal errors in the photon WASM code anyway,
+            // so we can't do anything about it.
+          }
         }
       }
       if (!image) {

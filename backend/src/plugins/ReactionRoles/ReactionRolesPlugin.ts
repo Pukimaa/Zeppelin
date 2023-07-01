@@ -1,8 +1,8 @@
 import { PluginOptions } from "knub";
+import { Queue } from "../../Queue";
 import { GuildReactionRoles } from "../../data/GuildReactionRoles";
 import { GuildSavedMessages } from "../../data/GuildSavedMessages";
 import { makeIoTsConfigParser } from "../../pluginUtils";
-import { Queue } from "../../Queue";
 import { LogsPlugin } from "../Logs/LogsPlugin";
 import { zeppelinGuildPlugin } from "../ZeppelinPluginBlueprint";
 import { ClearReactionRolesCmd } from "./commands/ClearReactionRolesCmd";
@@ -81,7 +81,7 @@ export const ReactionRolesPlugin = zeppelinGuildPlugin<ReactionRolesPluginType>(
   },
 
   beforeUnload(pluginData) {
-    const { state, guild } = pluginData;
+    const { state } = pluginData;
 
     if (state.autoRefreshTimeout) {
       clearTimeout(state.autoRefreshTimeout);

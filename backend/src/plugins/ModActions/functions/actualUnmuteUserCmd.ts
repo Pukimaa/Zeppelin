@@ -1,9 +1,9 @@
 import { GuildMember, Message, User } from "discord.js";
 import humanizeDuration from "humanize-duration";
 import { GuildPluginData } from "knub";
-import { MutesPlugin } from "../../../plugins/Mutes/MutesPlugin";
 import { hasPermission, sendErrorMessage, sendSuccessMessage } from "../../../pluginUtils";
-import { asSingleLine, UnknownUser } from "../../../utils";
+import { MutesPlugin } from "../../../plugins/Mutes/MutesPlugin";
+import { UnknownUser, asSingleLine, renderUserUsername } from "../../../utils";
 import { ModActionsPluginType } from "../types";
 import { formatReasonWithAttachments } from "./formatReasonWithAttachments";
 
@@ -48,7 +48,7 @@ export async function actualUnmuteCmd(
       pluginData,
       msg.channel,
       asSingleLine(`
-        Unmuting **${user.tag}**
+        Unmuting **${renderUserUsername(user)}**
         in ${timeUntilUnmute} (Case #${result.case.case_number})
       `),
     );
@@ -57,7 +57,7 @@ export async function actualUnmuteCmd(
       pluginData,
       msg.channel,
       asSingleLine(`
-        Unmuted **${user.tag}**
+        Unmuted **${renderUserUsername(user)}**
         (Case #${result.case.case_number})
       `),
     );

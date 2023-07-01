@@ -1,6 +1,6 @@
 import { GuildChannel, Message } from "discord.js";
 import moment from "moment-timezone";
-import { getRepository, Repository } from "typeorm";
+import { Repository, getRepository } from "typeorm";
 import { QueuedEventEmitter } from "../QueuedEventEmitter";
 import { noop } from "../utils";
 import { asyncMap } from "../utils/async";
@@ -126,7 +126,7 @@ export class GuildSavedMessages extends BaseGuildRepository<SavedMessage> {
       return entity;
     }
 
-    entity.data = await decryptJson(entity.data as unknown as string);
+    entity.data = (await decryptJson(entity.data as unknown as string)) as ISavedMessageData;
     return entity;
   }
 

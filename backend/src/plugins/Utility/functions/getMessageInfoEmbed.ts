@@ -1,8 +1,14 @@
 import { APIEmbed, MessageType, Snowflake, TextChannel } from "discord.js";
-import humanizeDuration from "humanize-duration";
-import { getDefaultMessageCommandPrefix, GuildPluginData } from "knub";
-import moment from "moment-timezone";
-import { chunkMessageLines, EmbedWith, messageLink, preEmbedPadding, trimEmptyLines, trimLines } from "../../../utils";
+import { GuildPluginData, getDefaultMessageCommandPrefix } from "knub";
+import {
+  EmbedWith,
+  chunkMessageLines,
+  messageLink,
+  preEmbedPadding,
+  renderUsername,
+  trimEmptyLines,
+  trimLines,
+} from "../../../utils";
 import { TimeAndDatePlugin } from "../../TimeAndDate/TimeAndDatePlugin";
 import { UtilityPluginType } from "../types";
 
@@ -31,28 +37,6 @@ export async function getMessageInfoEmbed(
     },
   };
 
-  const createdAt = moment.utc(message.createdAt, "x");
-  const tzCreatedAt = requestMemberId
-    ? await timeAndDate.inMemberTz(requestMemberId, createdAt)
-    : timeAndDate.inGuildTz(createdAt);
-  const prettyCreatedAt = tzCreatedAt.format(timeAndDate.getDateFormat("pretty_datetime"));
-  const messageAge = humanizeDuration(Date.now() - message.createdTimestamp, {
-    largest: 2,
-    round: true,
-  });
-
-  const editedAt = message.editedTimestamp ? moment.utc(message.editedTimestamp!, "x") : undefined;
-  const tzEditedAt = requestMemberId
-    ? await timeAndDate.inMemberTz(requestMemberId, editedAt)
-    : timeAndDate.inGuildTz(editedAt);
-  const prettyEditedAt = tzEditedAt.format(timeAndDate.getDateFormat("pretty_datetime"));
-  const editAge =
-    message.editedTimestamp &&
-    humanizeDuration(Date.now() - message.editedTimestamp, {
-      largest: 2,
-      round: true,
-    });
-
   const type =
     {
       [MessageType.Default]: "Regular message",
@@ -74,45 +58,23 @@ export async function getMessageInfoEmbed(
       ID: \`${message.id}\`
       Channel: <#${message.channel.id}>
       Channel ID: \`${message.channel.id}\`
-      Created: **${messageAge} ago** (\`${prettyCreatedAt}\`)
-      ${editedAt ? `Edited at: **${editAge} ago** (\`${prettyEditedAt}\`)` : ""}
+      Created: **<t:${Math.round(message.createdTimestamp / 1000)}:R>**
+      ${message.editedTimestamp ? `Edited at: **<t:${Math.round(message.editedTimestamp / 1000)}:R>**` : ""}
       Type: **${type}**
       Link: [**Go to message ➔**](${messageLink(pluginData.guild.id, message.channel.id, message.id)})
     `),
     ),
   });
 
-  const authorCreatedAt = moment.utc(message.author.createdAt, "x");
-  const tzAuthorCreatedAt = requestMemberId
-    ? await timeAndDate.inMemberTz(requestMemberId, authorCreatedAt)
-    : timeAndDate.inGuildTz(authorCreatedAt);
-  const prettyAuthorCreatedAt = tzAuthorCreatedAt.format(timeAndDate.getDateFormat("pretty_datetime"));
-  const authorAccountAge = humanizeDuration(Date.now() - message.author.createdTimestamp, {
-    largest: 2,
-    round: true,
-  });
-
-  const authorJoinedAt = message.member && moment.utc(message.member.joinedTimestamp!, "x");
-  const tzAuthorJoinedAt = authorJoinedAt
-    ? requestMemberId
-      ? await timeAndDate.inMemberTz(requestMemberId, authorJoinedAt)
-      : timeAndDate.inGuildTz(authorJoinedAt)
-    : null;
-  const prettyAuthorJoinedAt = tzAuthorJoinedAt?.format(timeAndDate.getDateFormat("pretty_datetime"));
-  const authorServerAge =
-    message.member &&
-    humanizeDuration(Date.now() - message.member.joinedTimestamp!, {
-      largest: 2,
-      round: true,
-    });
+  const authorJoinedAtTS = message.member?.joinedTimestamp;
 
   embed.fields.push({
     name: preEmbedPadding + "Author information",
     value: trimLines(`
-      Name: **${message.author.tag}**
+      Name: **${renderUsername(message.author.username, message.author.discriminator)}**
       ID: \`${message.author.id}\`
-      Created: **${authorAccountAge} ago** (\`${prettyAuthorCreatedAt}\`)
-      ${authorJoinedAt ? `Joined: **${authorServerAge} ago** (\`${prettyAuthorJoinedAt}\`)` : ""}
+      Created: **<t:${Math.round(message.author.createdTimestamp / 1000)}:R>**
+      ${authorJoinedAtTS ? `Joined: **<t:${Math.round(authorJoinedAtTS / 1000)}:R>**` : ""}
       Mention: <@!${message.author.id}>
     `),
   });

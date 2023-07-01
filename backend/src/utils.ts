@@ -20,6 +20,7 @@ import {
   MessageMentionOptions,
   PartialChannelData,
   PartialMessage,
+  RoleResolvable,
   Snowflake,
   Sticker,
   TextBasedChannel,
@@ -94,19 +95,11 @@ export function tNullable<T extends t.Type<any, any>>(type: T) {
   return t.union([type, t.undefined, t.null], `Nullable<${type.name}>`);
 }
 
-function typeHasProps(type: any): type is t.TypeC<any> {
-  return type.props != null;
-}
-
-function typeIsArray(type: any): type is t.ArrayC<any> {
-  return type._tag === "ArrayType";
-}
-
 export const tNormalizedNullOrUndefined = new t.Type<undefined, null | undefined>(
   "tNormalizedNullOrUndefined",
   (v): v is undefined => typeof v === "undefined",
   (v, c) => (v == null ? t.success(undefined) : t.failure(v, c, "Value must be null or undefined")),
-  (s) => undefined,
+  () => undefined,
 );
 
 /**
@@ -162,16 +155,6 @@ export function tDeepPartial<T>(type: T): TDeepPartial<T> {
     return t.array(tDeepPartial(type.type)) as TDeepPartial<T>;
   } else {
     return type as TDeepPartial<T>;
-  }
-}
-
-function tDeepPartialProp(prop: any) {
-  if (typeHasProps(prop)) {
-    return tDeepPartial(prop);
-  } else if (typeIsArray(prop)) {
-    return t.array(tDeepPartialProp(prop.type));
-  } else {
-    return prop;
   }
 }
 
@@ -479,7 +462,9 @@ export const tAllowedMentions = t.type({
 });
 
 export function dropPropertiesByName(obj, propName) {
-  if (obj.hasOwnProperty(propName)) delete obj[propName];
+  if (Object.hasOwn(obj, propName)) {
+    delete obj[propName];
+  }
   for (const value of Object.values(obj)) {
     if (typeof value === "object" && value !== null && !Array.isArray(value)) {
       dropPropertiesByName(value, propName);
@@ -583,8 +568,8 @@ export function get(obj, path, def?): any {
     .map((s) => s.trim())
     .filter((s) => s !== "");
   for (const part of pathParts) {
-    // hasOwnProperty check here is necessary to prevent prototype traversal in tags
-    if (!cursor.hasOwnProperty(part)) return def;
+    // hasOwn check here is necessary to prevent prototype traversal in tags
+    if (!Object.hasOwn(cursor, part)) return def;
     cursor = cursor[part];
     if (cursor === undefined) return def;
     if (cursor == null) return null;
@@ -680,7 +665,7 @@ export function parseInviteCodeInput(str: string): string {
   return getInviteCodesInString(str)[0];
 }
 
-export function isNotNull(value): value is Exclude<typeof value, null> {
+export function isNotNull<T>(value: T): value is Exclude<T, null | undefined> {
   return value != null;
 }
 
@@ -690,10 +675,10 @@ export function isNotNull(value): value is Exclude<typeof value, null> {
 // discord.gg/<code>
 // discord.com/friend-invite/<code>
 const quickInviteDetection =
-  /discord(?:app)?\.com\/(?:friend-)?invite\/([a-z0-9\-]+)|discord\.gg\/(?:\S+\/)?([a-z0-9\-]+)/gi;
+  /discord(?:app)?\.com\/(?:friend-)?invite\/([a-z0-9-]+)|discord\.gg\/(?:\S+\/)?([a-z0-9-]+)/gi;
 
 const isInviteHostRegex = /(?:^|\.)(?:discord.gg|discord.com|discordapp.com)$/i;
-const longInvitePathRegex = /^\/(?:friend-)?invite\/([a-z0-9\-]+)$/i;
+const longInvitePathRegex = /^\/(?:friend-)?invite\/([a-z0-9-]+)$/i;
 
 export function getInviteCodesInString(str: string): string[] {
   const inviteCodes: string[] = [];
@@ -1186,12 +1171,12 @@ const keyMods = ["+", "-", "="];
 export function deepKeyIntersect(obj, keyReference) {
   const result = {};
   for (let [key, value] of Object.entries(obj)) {
-    if (!keyReference.hasOwnProperty(key)) {
+    if (!Object.hasOwn(keyReference, key)) {
       // Temporary solution so we don't erase keys with modifiers
       // Modifiers will be removed soon(tm) so we can remove this when that happens as well
       let found = false;
       for (const mod of keyMods) {
-        if (keyReference.hasOwnProperty(mod + key)) {
+        if (Object.hasOwn(keyReference, mod + key)) {
           key = mod + key;
           found = true;
           break;
@@ -1266,7 +1251,7 @@ export function getUser(client: Client, userResolvable: string): User | UnknownU
  */
 export async function resolveUser(bot: Client, value: string): Promise<User | UnknownUser>;
 export async function resolveUser<T>(bot: Client, value: Not<T, string>): Promise<UnknownUser>;
-export async function resolveUser<T>(bot, value) {
+export async function resolveUser(bot, value) {
   if (typeof value !== "string") {
     return new UnknownUser();
   }
@@ -1367,24 +1352,40 @@ export async function resolveRoleId(bot: Client, guildId: string, value: string)
   return null;
 }
 
+export class UnknownRole {
+  public id: string;
+  public name: string;
+
+  constructor(props = {}) {
+    for (const key in props) {
+      this[key] = props[key];
+    }
+  }
+}
+
+export function resolveRole(guild: Guild, roleResolvable: RoleResolvable) {
+  const roleId = guild.roles.resolveId(roleResolvable);
+  return guild.roles.resolve(roleId) ?? new UnknownRole({ id: roleId, name: roleId });
+}
+
 const inviteCache = new SimpleCache<Promise<Invite | null>>(10 * MINUTES, 200);
 
-type ResolveInviteReturnType<T extends boolean> = Promise<Invite | null>;
+type ResolveInviteReturnType = Promise<Invite | null>;
 export async function resolveInvite<T extends boolean>(
   client: Client,
   code: string,
   withCounts?: T,
-): ResolveInviteReturnType<T> {
+): ResolveInviteReturnType {
   const key = `${code}:${withCounts ? 1 : 0}`;
 
   if (inviteCache.has(key)) {
-    return inviteCache.get(key) as ResolveInviteReturnType<T>;
+    return inviteCache.get(key) as ResolveInviteReturnType;
   }
 
   const promise = client.fetchInvite(code).catch(() => null);
   inviteCache.set(key, promise);
 
-  return promise as ResolveInviteReturnType<T>;
+  return promise as ResolveInviteReturnType;
 }
 
 const internalStickerCache: LimitedCollection<Snowflake, Sticker> = new LimitedCollection({ maxSize: 500 });
@@ -1430,18 +1431,18 @@ export function messageSummary(msg: SavedMessage) {
 
 export function verboseUserMention(user: User | UnknownUser): string {
   if (user.id == null) {
-    return `**${user.tag}**`;
+    return `**${renderUsername(user.username, user.discriminator)}**`;
   }
 
-  return `<@!${user.id}> (**${user.tag}**, \`${user.id}\`)`;
+  return `<@!${user.id}> (**${renderUsername(user.username, user.discriminator)}**, \`${user.id}\`)`;
 }
 
 export function verboseUserName(user: User | UnknownUser): string {
   if (user.id == null) {
-    return `**${user.tag}**`;
+    return `**${renderUsername(user.username, user.discriminator)}**`;
   }
 
-  return `**${user.tag}** (\`${user.id}\`)`;
+  return `**${renderUsername(user.username, user.discriminator)}** (\`${user.id}\`)`;
 }
 
 export function verboseChannelMention(channel: GuildBasedChannel): string {
@@ -1588,7 +1589,7 @@ export function inviteHasCounts(invite: Invite): invite is Invite {
 }
 
 export function asyncMap<T, R>(arr: T[], fn: (item: T) => Promise<R>): Promise<R[]> {
-  return Promise.all(arr.map((item, index) => fn(item)));
+  return Promise.all(arr.map((item) => fn(item)));
 }
 
 export function unique<T>(arr: T[]): T[] {
@@ -1601,3 +1602,14 @@ export function isTruthy<T>(value: T): value is Exclude<T, false | null | undefi
 }
 
 export const DBDateFormat = "YYYY-MM-DD HH:mm:ss";
+
+export function renderUsername(username: string, discriminator: string): string {
+  if (discriminator === "0") {
+    return username;
+  }
+  return `${username}#${discriminator}`;
+}
+
+export function renderUserUsername(user: User | UnknownUser): string {
+  return renderUsername(user.username, user.discriminator);
+}

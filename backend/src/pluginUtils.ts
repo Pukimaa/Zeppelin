@@ -17,15 +17,15 @@ import {
   ConfigValidationError,
   ExtendedMatchParams,
   GuildPluginData,
-  helpers,
   PluginOverrideCriteria,
+  helpers,
 } from "knub";
 import { logger } from "./logger";
 import { isStaff } from "./staff";
 import { TZeppelinKnub } from "./types";
 import { errorMessage, successMessage, tNullable } from "./utils";
 import { Tail } from "./utils/typeUtils";
-import { parseIoTsSchema, StrictValidationError } from "./validatorUtils";
+import { StrictValidationError, parseIoTsSchema } from "./validatorUtils";
 
 const { getMemberLevel } = helpers;
 
@@ -76,28 +76,6 @@ const PluginOverrideCriteriaType: t.Type<PluginOverrideCriteria<unknown>> = t.re
       extra: t.unknown,
     }),
 );
-
-const validTopLevelOverrideKeys = [
-  "channel",
-  "category",
-  "thread",
-  "is_thread",
-  "level",
-  "user",
-  "role",
-  "all",
-  "any",
-  "not",
-  "extra",
-  "config",
-];
-
-const BasicPluginStructureType = t.type({
-  enabled: tNullable(t.boolean),
-  config: tNullable(t.unknown),
-  overrides: tNullable(t.array(t.union([PluginOverrideCriteriaType, t.type({ config: t.unknown })]))),
-  replaceDefaultOverrides: tNullable(t.boolean),
-});
 
 export function strictValidationErrorToConfigValidationError(err: StrictValidationError) {
   return new ConfigValidationError(

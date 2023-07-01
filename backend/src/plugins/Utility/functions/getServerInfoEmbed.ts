@@ -1,22 +1,26 @@
 import { APIEmbed, ChannelType, GuildPremiumTier, Snowflake } from "discord.js";
-import humanizeDuration from "humanize-duration";
 import { GuildPluginData } from "knub";
-import moment from "moment-timezone";
 import {
   EmbedWith,
+  MINUTES,
   formatNumber,
   inviteHasCounts,
   memoize,
-  MINUTES,
   preEmbedPadding,
+  renderUsername,
   resolveInvite,
   resolveUser,
   trimLines,
 } from "../../../utils";
 import { idToTimestamp } from "../../../utils/idToTimestamp";
-import { TimeAndDatePlugin } from "../../TimeAndDate/TimeAndDatePlugin";
 import { UtilityPluginType } from "../types";
 import { getGuildPreview } from "./getGuildPreview";
+
+const prettifyFeature = (feature: string): string =>
+  `\`${feature
+    .split("_")
+    .map((e) => `${e.substring(0, 1).toUpperCase()}${e.substring(1).toLowerCase()}`)
+    .join(" ")}\``;
 
 export async function getServerInfoEmbed(
   pluginData: GuildPluginData<UtilityPluginType>,
@@ -50,42 +54,30 @@ export async function getServerInfoEmbed(
   };
 
   // BASIC INFORMATION
-  const timeAndDate = pluginData.getPlugin(TimeAndDatePlugin);
-  const createdAt = moment.utc(idToTimestamp((guildPreview || restGuild)!.id)!, "x");
-  const tzCreatedAt = requestMemberId
-    ? await timeAndDate.inMemberTz(requestMemberId, createdAt)
-    : timeAndDate.inGuildTz(createdAt);
-  const prettyCreatedAt = tzCreatedAt.format(timeAndDate.getDateFormat("pretty_datetime"));
-  const serverAge = humanizeDuration(moment.utc().valueOf() - createdAt.valueOf(), {
-    largest: 2,
-    round: true,
-  });
+  const createdAtTs = Number(idToTimestamp((guildPreview || restGuild)!.id)!);
 
   const basicInformation: string[] = [];
-  basicInformation.push(`Created: **${serverAge} ago** (\`${prettyCreatedAt}\`)`);
+  basicInformation.push(`Created: **<t:${Math.round(createdAtTs / 1000)}:R>**`);
 
   if (thisServer) {
     const owner = await resolveUser(pluginData.client, thisServer.ownerId);
-    const ownerName = owner.tag;
+    const ownerName = renderUsername(owner.username, owner.discriminator);
 
     basicInformation.push(`Owner: **${ownerName}** (\`${thisServer.ownerId}\`)`);
     // basicInformation.push(`Voice region: **${thisServer.region}**`); Outdated, as automatic voice regions are fully live
   }
 
   if (features.length > 0) {
-    basicInformation.push(`Features: ${features.join(", ")}`);
+    basicInformation.push(`Features: ${features.map(prettifyFeature).join(", ")}`);
   }
 
-  embed.fields.push({
-    name: preEmbedPadding + "Basic information",
-    value: basicInformation.join("\n"),
-  });
+  embed.description = `${preEmbedPadding}**Basic Information**\n${basicInformation.join("\n")}`;
 
   // IMAGE LINKS
-  const iconUrl = `[Link](${(restGuild || guildPreview)!.iconURL({ size: 2048 })})`;
-  const bannerUrl = restGuild?.banner ? `[Link](${restGuild.bannerURL({ size: 2048 })})` : "None";
+  const iconUrl = `[Link](${(restGuild || guildPreview)!.iconURL()})`;
+  const bannerUrl = restGuild?.banner ? `[Link](${restGuild.bannerURL()})` : "None";
   const splashUrl = (restGuild || guildPreview)!.splash
-    ? `[Link](${(restGuild || guildPreview)!.splashURL({ size: 2048 })})`
+    ? `[Link](${(restGuild || guildPreview)!.splashURL()})`
     : "None";
 
   embed.fields.push(
@@ -153,15 +145,21 @@ export async function getServerInfoEmbed(
 
   // CHANNEL COUNTS
   if (thisServer) {
-    const totalChannels = thisServer.channels.cache.size;
     const categories = thisServer.channels.cache.filter((channel) => channel.type === ChannelType.GuildCategory);
     const textChannels = thisServer.channels.cache.filter((channel) => channel.type === ChannelType.GuildText);
     const voiceChannels = thisServer.channels.cache.filter((channel) => channel.type === ChannelType.GuildVoice);
-    const threadChannels = thisServer.channels.cache.filter((channel) => channel.isThread());
+    const forumChannels = thisServer.channels.cache.filter((channel) => channel.type === ChannelType.GuildForum);
+    const threadChannelsText = thisServer.channels.cache.filter(
+      (channel) => channel.isThread() && channel.parent?.type !== ChannelType.GuildForum,
+    );
+    const threadChannelsForums = thisServer.channels.cache.filter(
+      (channel) => channel.isThread() && channel.parent?.type === ChannelType.GuildForum,
+    );
     const announcementChannels = thisServer.channels.cache.filter(
       (channel) => channel.type === ChannelType.GuildAnnouncement,
     );
     const stageChannels = thisServer.channels.cache.filter((channel) => channel.type === ChannelType.GuildStageVoice);
+    const totalChannels = thisServer.channels.cache.filter((channel) => !channel.isThread()).size;
 
     embed.fields.push({
       name: preEmbedPadding + "Channels",
@@ -169,7 +167,8 @@ export async function getServerInfoEmbed(
       value: trimLines(`
           Total: **${totalChannels}** / 500
           Categories: **${categories.size}**
-          Text: **${textChannels.size}** (**${threadChannels.size} threads**)
+          Text: **${textChannels.size}** (**${threadChannelsText.size} threads**)
+          Forums: **${forumChannels.size}** (**${threadChannelsForums.size} threads**)
           Announcement: **${announcementChannels.size}**
           Voice: **${voiceChannels.size}**
           Stage: **${stageChannels.size}**
@@ -183,6 +182,12 @@ export async function getServerInfoEmbed(
   if (thisServer) {
     otherStats.push(`Roles: **${thisServer.roles.cache.size}** / 250`);
   }
+
+  const roleLockedEmojis =
+    (restGuild
+      ? restGuild?.emojis?.cache.filter((e) => e.roles.cache.size)
+      : guildPreview?.emojis.filter((e) => e.roles.length)
+    )?.size ?? 0;
 
   if (restGuild) {
     const maxEmojis =
@@ -200,15 +205,25 @@ export async function getServerInfoEmbed(
         [GuildPremiumTier.Tier3]: 60,
       }[restGuild.premiumTier] ?? 0;
 
-    otherStats.push(`Emojis: **${restGuild.emojis.cache.size}** / ${maxEmojis * 2}`);
+    otherStats.push(
+      `Emojis: **${restGuild.emojis.cache.size}** / ${maxEmojis * 2}${
+        roleLockedEmojis ? ` (__${roleLockedEmojis} role-locked__)` : ""
+      }`,
+    );
     otherStats.push(`Stickers: **${restGuild.stickers.cache.size}** / ${maxStickers}`);
   } else {
-    otherStats.push(`Emojis: **${guildPreview!.emojis.size}**`);
+    otherStats.push(
+      `Emojis: **${guildPreview!.emojis.size}**${roleLockedEmojis ? ` (__${roleLockedEmojis} role-locked__)` : ""}`,
+    );
     // otherStats.push(`Stickers: **${guildPreview!.stickers.size}**`); Wait on DJS
   }
 
   if (thisServer) {
-    otherStats.push(`Boosts: **${thisServer.premiumSubscriptionCount ?? 0}** (level ${thisServer.premiumTier})`);
+    otherStats.push(
+      `Boosts: **${thisServer.premiumSubscriptionCount ?? 0}**${
+        thisServer.premiumTier ? ` (level ${thisServer.premiumTier})` : ""
+      }`,
+    );
   }
 
   embed.fields.push({

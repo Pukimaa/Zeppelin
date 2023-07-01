@@ -2,8 +2,8 @@ import { ApiPermissions } from "@shared/apiPermissions";
 import express, { Request, Response } from "express";
 import moment from "moment-timezone";
 import { z } from "zod";
-import { Case } from "../../data/entities/Case";
 import { GuildCases } from "../../data/GuildCases";
+import { Case } from "../../data/entities/Case";
 import { MINUTES } from "../../utils";
 import { requireGuildPermission } from "../permissions";
 import { rateLimit } from "../rateLimits";
@@ -50,7 +50,7 @@ export function initGuildsImportExportAPI(guildRouter: express.Router) {
   importExportRouter.get(
     "/:guildId/pre-import",
     requireGuildPermission(ApiPermissions.ManageAccess),
-    async (req: Request, res: Response) => {
+    async (req: Request) => {
       const guildCases = GuildCases.getGuildInstance(req.params.guildId);
       const minNum = await guildCases.getMinCaseNumber();
       const maxNum = await guildCases.getMaxCaseNumber();

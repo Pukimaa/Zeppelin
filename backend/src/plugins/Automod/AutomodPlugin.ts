@@ -15,6 +15,7 @@ import { LogsPlugin } from "../Logs/LogsPlugin";
 import { ModActionsPlugin } from "../ModActions/ModActionsPlugin";
 import { MutesPlugin } from "../Mutes/MutesPlugin";
 import { PhishermanPlugin } from "../Phisherman/PhishermanPlugin";
+import { RoleManagerPlugin } from "../RoleManager/RoleManagerPlugin";
 import { zeppelinGuildPlugin } from "../ZeppelinPluginBlueprint";
 import { availableActions } from "./actions/availableActions";
 import { AntiraidClearCmd } from "./commands/AntiraidClearCmd";
@@ -196,6 +197,7 @@ export const AutomodPlugin = zeppelinGuildPlugin<AutomodPluginType>()({
     CountersPlugin,
     PhishermanPlugin,
     InternalPosterPlugin,
+    RoleManagerPlugin,
   ],
 
   defaultOptions,
@@ -246,7 +248,7 @@ export const AutomodPlugin = zeppelinGuildPlugin<AutomodPluginType>()({
   },
 
   async afterLoad(pluginData) {
-    const { state, guild } = pluginData;
+    const { state } = pluginData;
 
     state.clearRecentActionsInterval = setInterval(() => clearOldRecentActions(pluginData), 1 * MINUTES);
     state.clearRecentSpamInterval = setInterval(() => clearOldRecentSpam(pluginData), 1 * SECONDS);

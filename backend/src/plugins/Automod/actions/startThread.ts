@@ -6,8 +6,8 @@ import {
   ThreadChannel,
 } from "discord.js";
 import * as t from "io-ts";
-import { renderTemplate, TemplateSafeValueContainer } from "../../../templateFormatter";
-import { convertDelayStringToMS, MINUTES, noop, tDelayString, tNullable } from "../../../utils";
+import { TemplateSafeValueContainer, renderTemplate } from "../../../templateFormatter";
+import { MINUTES, convertDelayStringToMS, noop, tDelayString, tNullable } from "../../../utils";
 import { savedMessageToTemplateSafeSavedMessage, userToTemplateSafeUser } from "../../../utils/templateSafeObjects";
 import { automodAction } from "../helpers";
 
@@ -31,7 +31,7 @@ export const StartThreadAction = automodAction({
     limit_per_channel: 5,
   },
 
-  async apply({ pluginData, contexts, actionConfig, ruleName }) {
+  async apply({ pluginData, contexts, actionConfig }) {
     // check if the message still exists, we don't want to create threads for deleted messages
     const threads = contexts.filter((c) => {
       if (!c.message || !c.user) return false;
@@ -67,7 +67,7 @@ export const StartThreadAction = automodAction({
             msg: savedMessageToTemplateSafeSavedMessage(threadContext.message!),
           }),
         );
-      const threadName = await renderThreadName(actionConfig.name ?? "{user.tag}s thread");
+      const threadName = await renderThreadName(actionConfig.name ?? "{user.renderedUsername}'s thread");
       const threadOptions: GuildTextThreadCreateOptions<unknown> = {
         name: threadName,
         autoArchiveDuration: autoArchive,
