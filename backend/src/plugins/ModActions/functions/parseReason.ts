@@ -1,8 +1,9 @@
-import { TConfigSchema } from "../types";
+import z from "zod";
+import { zModActionsConfig } from "../types";
 
 const MAX_REASON_LENGTH = 512;
 
-export function parseReason(config: TConfigSchema, reason: string): string {
+export function parseReason(config: z.infer<typeof zModActionsConfig>, reason: string): string {
   if (!reason) return reason;
   if (config?.reason_aliases) {
     reason = config.reason_aliases[reason.toLowerCase()] ?? reason;
