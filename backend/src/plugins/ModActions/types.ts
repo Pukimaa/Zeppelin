@@ -44,6 +44,7 @@ export const zModActionsConfig = z.strictObject({
   can_deletecase: z.boolean(),
   can_act_as_other: z.boolean(),
   create_cases_for_manual_actions: z.boolean(),
+  reason_aliases: z.nullable(z.record(z.string, z.string)),
 });
 
 export interface ModActionsEvents {
