@@ -41,7 +41,7 @@ export const ContextMenuPlugin = zeppelinGuildPlugin<ContextMenuPluginType>()({
     description: trimPluginDescription(`
       This plugin provides command shortcuts via context menus
     `),
-    configSchema: ConfigSchema,
+    configSchema: zContextMenusConfig,
   },
 
   dependencies: () => [CasesPlugin, MutesPlugin, ModActionsPlugin, LogsPlugin, UtilityPlugin],
