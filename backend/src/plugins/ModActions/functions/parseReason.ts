@@ -3,8 +3,8 @@ import { zModActionsConfig } from "../types";
 
 const MAX_REASON_LENGTH = 512;
 
-export function parseReason(config: z.infer<typeof zModActionsConfig>, reason: string): string {
-  if (!reason) return reason;
+export function parseReason(config: z.infer<typeof zModActionsConfig>, reason: string | undefined): string {
+  if (!reason) return "";
   if (config?.reason_aliases) {
     reason = config.reason_aliases[reason.toLowerCase()] ?? reason;
   }

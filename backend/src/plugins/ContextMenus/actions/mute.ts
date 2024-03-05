@@ -68,15 +68,14 @@ async function muteAction(
   const durationMs = duration ? convertDelayStringToMS(duration)! : undefined;
 
   try {
-    const result = await mutes.muteUser(target, durationMs, reason, { caseArgs });
-
+    const result = await mutes.muteUser(target, durationMs, reason, reason, { caseArgs });
     const messageResultText = result.notifyResult.text ? ` (${result.notifyResult.text})` : "";
     const muteMessage = `Muted **${result.case!.user_name}** ${
       durationMs ? `for ${humanizeDuration(durationMs)}` : "indefinitely"
     } (Case #${result.case!.case_number})${messageResultText}`;
 
     if (evidence) {
-      await updateAction(pluginData, executingMember, result.case, evidence);
+      await updateAction(pluginData, executingMember, result.case!, evidence);
     }
 
     await interactionToReply

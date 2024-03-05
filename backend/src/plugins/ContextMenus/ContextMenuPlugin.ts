@@ -1,5 +1,6 @@
 import { PluginOptions } from "knub";
 import { GuildCases } from "../../data/GuildCases";
+import { makeIoTsConfigParser } from "../../pluginUtils";
 import { trimPluginDescription } from "../../utils";
 import { CasesPlugin } from "../Cases/CasesPlugin";
 import { LogsPlugin } from "../Logs/LogsPlugin";
@@ -13,7 +14,7 @@ import { ModMenuCmd } from "./commands/ModMenuUserCtxCmd";
 import { MuteCmd } from "./commands/MuteUserCtxCmd";
 import { NoteCmd } from "./commands/NoteUserCtxCmd";
 import { WarnCmd } from "./commands/WarnUserCtxCmd";
-import { ContextMenuPluginType, zContextMenusConfig } from "./types";
+import { ConfigSchema, ContextMenuPluginType } from "./types";
 
 const defaultOptions: PluginOptions<ContextMenuPluginType> = {
   config: {
@@ -41,11 +42,11 @@ export const ContextMenuPlugin = zeppelinGuildPlugin<ContextMenuPluginType>()({
     description: trimPluginDescription(`
       This plugin provides command shortcuts via context menus
     `),
-    configSchema: zContextMenusConfig,
+    configSchema: ConfigSchema,
   },
 
   dependencies: () => [CasesPlugin, MutesPlugin, ModActionsPlugin, LogsPlugin, UtilityPlugin],
-  configParser: (input) => zContextMenusConfig.parse(input),
+  configParser: makeIoTsConfigParser(ConfigSchema),
 
   defaultOptions,
 

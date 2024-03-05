@@ -5,7 +5,6 @@ import { GuildCases } from "../../data/GuildCases";
 
 export const zContextMenusConfig = z.strictObject({
   can_use: z.boolean(),
-
   can_open_mod_menu: z.boolean(),
 });
 
