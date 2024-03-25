@@ -70,6 +70,7 @@
     "threads": "^1.7.0",
     "tlds": "^1.221.1",
     "tmp": "0.0.33",
+    "ts-toolbelt": "^9.6.0",
     "tsconfig-paths": "^3.9.0",
     "twemoji": "^12.1.4",
     "typeorm": "^0.3.17",
@@ -77,8 +78,7 @@
     "uuid": "^9.0.0",
     "yawn-yaml": "github:dragory/yawn-yaml#string-number-fix-build",
     "zlib-sync": "^0.1.7",
-    "zod": "^3.7.2",
-    "ts-toolbelt": "^9.6.0"
+    "zod": "^3.7.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.5",
@@ -99,8 +99,8 @@
     "ava": "^5.3.1",
     "rimraf": "^2.6.2",
     "source-map-support": "^0.5.16",
-    "zod-to-json-schema": "^3.22.3",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "zod-to-json-schema": "^3.22.3"
   },
   "ava": {
     "files": [
