@@ -7,6 +7,7 @@ import { chunkMessageLines, emptyEmbedValue, messageLink } from "../../../utils"
 import { TimeAndDatePlugin } from "../../TimeAndDate/TimeAndDatePlugin";
 import { CasesPluginType } from "../types";
 import { getCaseColor } from "./getCaseColor";
+import { getCaseIcon } from "./getCaseIcon";
 import { resolveCaseId } from "./resolveCaseId";
 
 export async function getCaseEmbed(
@@ -24,6 +25,7 @@ export async function getCaseEmbed(
 
   const createdAt = moment.utc(theCase.created_at);
   const actionTypeStr = CaseTypes[theCase.type].toUpperCase();
+  const caseIcon = getCaseIcon(pluginData, theCase.type)
 
   let userName = theCase.user_name;
   if (theCase.user_id && theCase.user_id !== "0") userName += `\n<@!${theCase.user_id}>`;
@@ -36,7 +38,7 @@ export async function getCaseEmbed(
     : timeAndDate.inGuildTz(createdAt);
 
   const embed: any = {
-    title: `${actionTypeStr} - Case #${theCase.case_number}`,
+    title: `${caseIcon} ${actionTypeStr} - Case #${theCase.case_number}`,
     footer: {
       text: `Case created on ${createdAtWithTz.format(timeAndDate.getDateFormat("pretty_datetime"))}`,
     },
