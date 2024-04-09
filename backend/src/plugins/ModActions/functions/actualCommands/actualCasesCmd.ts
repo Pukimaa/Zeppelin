@@ -5,15 +5,7 @@ import { FindOptionsWhere } from "typeorm/find-options/FindOptionsWhere";
 import { CaseTypes } from "../../../../data/CaseTypes";
 import { Case } from "../../../../data/entities/Case";
 import { sendContextResponse } from "../../../../pluginUtils";
-import {
-  UnknownUser,
-  chunkArray,
-  emptyEmbedValue,
-  renderUsername,
-  resolveMember,
-  resolveUser,
-  trimLines,
-} from "../../../../utils";
+import { UnknownUser, chunkArray, emptyEmbedValue, renderUsername, trimLines } from "../../../../utils";
 import { asyncMap } from "../../../../utils/async";
 import { createPaginatedMessage } from "../../../../utils/createPaginatedMessage";
 import { getGuildPrefix } from "../../../../utils/getGuildPrefix";
@@ -223,7 +215,7 @@ async function casesModCmd(
 export async function actualCasesCmd(
   pluginData: GuildPluginData<ModActionsPluginType>,
   context: Message | ChatInputCommandInteraction,
-  modId: string | null,
+  modObj: GuildMember | User | UnknownUser | null,
   user: GuildMember | User | UnknownUser | null,
   author: GuildMember,
   notes: boolean | null,
@@ -238,10 +230,8 @@ export async function actualCasesCmd(
   expand: boolean | null,
   show: boolean | null,
 ) {
-  const mod = modId
-    ? (await resolveMember(pluginData.client, pluginData.guild, modId)) || (await resolveUser(pluginData.client, modId))
-    : null;
-  const modName = modId ? (mod instanceof UnknownUser ? modId : renderUsername(mod!)) : renderUsername(author);
+  const mod = modObj ?? author;
+  const modName = renderUsername(mod);
 
   const allTypes = [
     CaseTypes.Note,
@@ -275,7 +265,7 @@ export async function actualCasesCmd(
         pluginData,
         context,
         author.user,
-        modId!,
+        mod.id,
         user,
         modName,
         typesToShow,
@@ -287,7 +277,7 @@ export async function actualCasesCmd(
         pluginData,
         context,
         author.user,
-        modId!,
+        mod.id,
         mod ?? author,
         modName,
         typesToShow,
