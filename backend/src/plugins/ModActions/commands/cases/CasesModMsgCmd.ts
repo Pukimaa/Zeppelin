@@ -1,3 +1,4 @@
+import { resolveMember, resolveUser } from "src/utils";
 import { commandTypeHelpers as ct } from "../../../../commandTypes";
 import { actualCasesCmd } from "../../functions/actualCommands/actualCasesCmd";
 import { modActionsMsgCmd } from "../../types";
@@ -29,10 +30,14 @@ export const CasesModMsgCmd = modActionsMsgCmd({
   ],
 
   async run({ pluginData, message: msg, args }) {
+    const mod =
+      (await resolveMember(pluginData.client, pluginData.guild, args.mod)) ||
+      (await resolveUser(pluginData.client, args.mod));
+
     return actualCasesCmd(
       pluginData,
       msg,
-      args.mod,
+      mod,
       null,
       msg.member,
       args.notes,

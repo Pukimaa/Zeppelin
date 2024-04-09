@@ -230,7 +230,10 @@ export async function actualCasesCmd(
   expand: boolean | null,
   show: boolean | null,
 ) {
-  const mod = modObj ?? author;
+  let mod = modObj ?? author;
+
+  if (mod instanceof UnknownUser) mod = author;
+
   const modName = renderUsername(mod);
 
   const allTypes = [

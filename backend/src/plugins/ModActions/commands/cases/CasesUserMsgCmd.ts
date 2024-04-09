@@ -42,10 +42,14 @@ export const CasesUserMsgCmd = modActionsMsgCmd({
       return;
     }
 
+    const mod =
+      (await resolveMember(pluginData.client, pluginData.guild, args.mod)) ||
+      (await resolveUser(pluginData.client, args.mod));
+
     return actualCasesCmd(
       pluginData,
       msg,
-      args.mod,
+      mod,
       user,
       msg.member,
       args.notes,
