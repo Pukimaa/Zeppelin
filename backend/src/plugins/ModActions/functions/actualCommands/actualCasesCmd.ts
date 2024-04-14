@@ -5,7 +5,15 @@ import { FindOptionsWhere } from "typeorm/find-options/FindOptionsWhere";
 import { CaseTypes } from "../../../../data/CaseTypes";
 import { Case } from "../../../../data/entities/Case";
 import { sendContextResponse } from "../../../../pluginUtils";
-import { UnknownUser, chunkArray, emptyEmbedValue, renderUsername, trimLines } from "../../../../utils";
+import {
+  UnknownUser,
+  chunkArray,
+  emptyEmbedValue,
+  renderUsername,
+  resolveMember,
+  resolveUser,
+  trimLines,
+} from "../../../../utils";
 import { asyncMap } from "../../../../utils/async";
 import { createPaginatedMessage } from "../../../../utils/createPaginatedMessage";
 import { getGuildPrefix } from "../../../../utils/getGuildPrefix";
@@ -230,11 +238,11 @@ export async function actualCasesCmd(
   expand: boolean | null,
   show: boolean | null,
 ) {
-  let mod = modObj ?? author;
-
-  if (mod instanceof UnknownUser) mod = author;
-
-  const modName = renderUsername(mod);
+  const modId = modObj?.id;
+  const mod = modId
+    ? (await resolveMember(pluginData.client, pluginData.guild, modId)) || (await resolveUser(pluginData.client, modId))
+    : null;
+  const modName = modId ? (mod instanceof UnknownUser ? modId : renderUsername(mod!)) : renderUsername(author);
 
   const allTypes = [
     CaseTypes.Note,
@@ -268,7 +276,7 @@ export async function actualCasesCmd(
         pluginData,
         context,
         author.user,
-        mod.id,
+        mod ? mod.id : null,
         user,
         modName,
         typesToShow,
@@ -280,7 +288,7 @@ export async function actualCasesCmd(
         pluginData,
         context,
         author.user,
-        mod.id,
+        mod ? mod.id : null,
         mod ?? author,
         modName,
         typesToShow,
