@@ -1,9 +1,9 @@
 import { APIEmbed } from "discord.js";
 import { commandTypeHelpers as ct } from "../../../commandTypes";
-import { sendErrorMessage } from "../../../pluginUtils";
 import { isValidEmbed, trimLines } from "../../../utils";
 import { parseColor } from "../../../utils/parseColor";
 import { rgbToInt } from "../../../utils/rgbToInt";
+import { CommonPlugin } from "../../Common/CommonPlugin";
 import { postCmd } from "../types";
 import { actualPostCmd } from "../util/actualPostCmd";
 import { formatContent } from "../util/formatContent";
@@ -31,7 +31,7 @@ export const PostEmbedCmd = postCmd({
     const content = args.content || args.maincontent;
 
     if (!args.title && !content) {
-      sendErrorMessage(pluginData, msg.channel, "Title or content required");
+      void pluginData.state.common.sendErrorMessage(msg, "Title or content required");
       return;
     }
 
@@ -41,7 +41,7 @@ export const PostEmbedCmd = postCmd({
       if (colorRgb) {
         color = rgbToInt(colorRgb);
       } else {
-        sendErrorMessage(pluginData, msg.channel, "Invalid color specified");
+        void pluginData.state.common.sendErrorMessage(msg, "Invalid color specified");
         return;
       }
     }
@@ -56,12 +56,12 @@ export const PostEmbedCmd = postCmd({
         try {
           parsed = JSON.parse(content);
         } catch (e) {
-          sendErrorMessage(pluginData, msg.channel, `Syntax error in embed JSON: ${e.message}`);
+          void pluginData.state.common.sendErrorMessage(msg, `Syntax error in embed JSON: ${e.message}`);
           return;
         }
 
         if (!isValidEmbed(parsed)) {
-          sendErrorMessage(pluginData, msg.channel, "Embed is not valid");
+          void pluginData.state.common.sendErrorMessage(msg, "Embed is not valid");
           return;
         }
 

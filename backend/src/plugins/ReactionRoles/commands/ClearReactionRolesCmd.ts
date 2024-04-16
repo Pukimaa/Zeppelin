@@ -1,7 +1,7 @@
 import { Message } from "discord.js";
 import { commandTypeHelpers as ct } from "../../../commandTypes";
-import { sendErrorMessage, sendSuccessMessage } from "../../../pluginUtils";
 import { isDiscordAPIError } from "../../../utils";
+import { CommonPlugin } from "../../Common/CommonPlugin";
 import { reactionRolesCmd } from "../types";
 
 export const ClearReactionRolesCmd = reactionRolesCmd({
@@ -15,7 +15,7 @@ export const ClearReactionRolesCmd = reactionRolesCmd({
   async run({ message: msg, args, pluginData }) {
     const existingReactionRoles = pluginData.state.reactionRoles.getForMessage(args.message.messageId);
     if (!existingReactionRoles) {
-      sendErrorMessage(pluginData, msg.channel, "Message doesn't have reaction roles on it");
+      void pluginData.state.common.sendErrorMessage(msg, "Message doesn't have reaction roles on it");
       return;
     }
 
@@ -26,7 +26,7 @@ export const ClearReactionRolesCmd = reactionRolesCmd({
       targetMessage = await args.message.channel.messages.fetch(args.message.messageId);
     } catch (err) {
       if (isDiscordAPIError(err) && err.code === 50001) {
-        sendErrorMessage(pluginData, msg.channel, "Missing access to the specified message");
+        void pluginData.state.common.sendErrorMessage(msg, "Missing access to the specified message");
         return;
       }
 
@@ -35,6 +35,6 @@ export const ClearReactionRolesCmd = reactionRolesCmd({
 
     await targetMessage.reactions.removeAll();
 
-    sendSuccessMessage(pluginData, msg.channel, "Reaction roles cleared");
+    void pluginData.state.common.sendSuccessMessage(msg, "Reaction roles cleared");
   },
 });

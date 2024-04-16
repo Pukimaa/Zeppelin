@@ -1,7 +1,8 @@
 import { ApiPermissions } from "@zeppelinbot/shared";
 import { commandTypeHelpers as ct } from "../../../commandTypes";
-import { isStaffPreFilter, sendErrorMessage, sendSuccessMessage } from "../../../pluginUtils";
+import { isStaffPreFilter } from "../../../pluginUtils";
 import { renderUsername } from "../../../utils";
+import { CommonPlugin } from "../../Common/CommonPlugin";
 import { botControlCmd } from "../types";
 
 export const AddDashboardUserCmd = botControlCmd({
@@ -19,7 +20,7 @@ export const AddDashboardUserCmd = botControlCmd({
   async run({ pluginData, message: msg, args }) {
     const guild = await pluginData.state.allowedGuilds.find(args.guildId);
     if (!guild) {
-      sendErrorMessage(pluginData, msg.channel, "Server is not using Zeppelin");
+      void msg.channel.send("Server is not using Zeppelin");
       return;
     }
 
@@ -36,10 +37,7 @@ export const AddDashboardUserCmd = botControlCmd({
     }
 
     const userNameList = args.users.map((user) => `<@!${user.id}> (**${renderUsername(user)}**, \`${user.id}\`)`);
-    sendSuccessMessage(
-      pluginData,
-      msg.channel,
-      `The following users were given dashboard access for **${guild.name}**:\n\n${userNameList}`,
-    );
+
+    msg.channel.send(`The following users were given dashboard access for **${guild.name}**:\n\n${userNameList}`);
   },
 });

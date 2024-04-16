@@ -1,8 +1,8 @@
 import { escapeInlineCode } from "discord.js";
 import { commandTypeHelpers as ct } from "../../../commandTypes";
-import { sendErrorMessage, sendSuccessMessage } from "../../../pluginUtils";
 import { trimLines } from "../../../utils";
 import { parseFuzzyTimezone } from "../../../utils/parseFuzzyTimezone";
+import { CommonPlugin } from "../../Common/CommonPlugin";
 import { timeAndDateCmd } from "../types";
 
 export const SetTimezoneCmd = timeAndDateCmd({
@@ -16,9 +16,8 @@ export const SetTimezoneCmd = timeAndDateCmd({
   async run({ pluginData, message, args }) {
     const parsedTz = parseFuzzyTimezone(args.timezone);
     if (!parsedTz) {
-      sendErrorMessage(
-        pluginData,
-        message.channel,
+      void pluginData.state.common.sendErrorMessage(
+        message,
         trimLines(`
         Invalid timezone: \`${escapeInlineCode(args.timezone)}\`
         Zeppelin uses timezone locations rather than specific timezone names.
@@ -29,6 +28,6 @@ export const SetTimezoneCmd = timeAndDateCmd({
     }
 
     await pluginData.state.memberTimezones.set(message.author.id, parsedTz);
-    sendSuccessMessage(pluginData, message.channel, `Your timezone is now set to **${parsedTz}**`);
+    void pluginData.state.common.sendSuccessMessage(message, `Your timezone is now set to **${parsedTz}**`);
   },
 });

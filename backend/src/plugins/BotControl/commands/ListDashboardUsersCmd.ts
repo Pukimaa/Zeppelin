@@ -1,6 +1,6 @@
 import { commandTypeHelpers as ct } from "../../../commandTypes";
-import { sendErrorMessage, sendSuccessMessage } from "../../../pluginUtils";
 import { renderUsername, resolveUser } from "../../../utils";
+import { CommonPlugin } from "../../Common/CommonPlugin";
 import { botControlCmd } from "../types";
 
 export const ListDashboardUsersCmd = botControlCmd({
@@ -14,7 +14,7 @@ export const ListDashboardUsersCmd = botControlCmd({
   async run({ pluginData, message: msg, args }) {
     const guild = await pluginData.state.allowedGuilds.find(args.guildId);
     if (!guild) {
-      sendErrorMessage(pluginData, msg.channel, "Server is not using Zeppelin");
+      void msg.channel.send("Server is not using Zeppelin");
       return;
     }
 
@@ -30,11 +30,9 @@ export const ListDashboardUsersCmd = botControlCmd({
         `<@!${user.id}> (**${renderUsername(user)}**, \`${user.id}\`): ${permission.permissions.join(", ")}`,
     );
 
-    sendSuccessMessage(
-      pluginData,
-      msg.channel,
-      `The following users have dashboard access for **${guild.name}**:\n\n${userNameList.join("\n")}`,
-      {},
-    );
+    msg.channel.send({
+      content: `The following users have dashboard access for **${guild.name}**:\n\n${userNameList.join("\n")}`,
+      allowedMentions: {},
+    });
   },
 });
