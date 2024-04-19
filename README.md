@@ -20,7 +20,7 @@ Please note that some branding of this fork has been adjusted to fit Pukima's Ap
 - And more!
 
 **Custom features added by Pukima:**
-- Slash Commands (by Lily)
+- Slash Commands (by [LilyBergonzat](https://github.com/ZeppelinBot/Zeppelin/pull/455))
   - Bug fixes and improvements by Pukima
 - Context Menu Apps (by [LilyBergonzat](https://github.com/ZeppelinBot/Zeppelin/pull/455) & [Obliie](https://github.com/ZeppelinBot/Zeppelin/pull/421))
 - Reason Aliases ([metal0](https://github.com/ZeppelinBot/Zeppelin/pull/390))
