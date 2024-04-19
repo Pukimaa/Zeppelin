@@ -3,8 +3,8 @@
     <header>
       <h1>Moderation</h1>
       <p>
-        Moderation in Zeppelin is multi-layered. On top of typical actions such
-        as warning, muting, kicking, and banning, Zeppelin allows moderators to
+        Moderation in the app is multi-layered. On top of typical actions such
+        as warning, muting, kicking, and banning, the app allows moderators to
         utilise flags; create alerts; set thresholds; and act as others.
       </p>
       <p>
@@ -28,7 +28,7 @@
 
     <h2>Moderation Commands</h2>
     <p>
-      So that your moderators may use Zeppelin moderation, you must define the
+      So that your moderators may use the app's moderation, you must define the
       moderator role id in the config, assign it a level (50), and enable the
       Mod actions plugin.
       <CodeBlock code-lang="yaml" trim="start">
@@ -46,7 +46,7 @@
     </p>
 
     <h2>Sanction Notifications</h2>
-    <p>These config options define how Zeppelin will interact with the
+    <p>These config options define how the app will interact with the
       members it sanctions (warns, kicks, bans).</p>
 
     <h3>DM Values</h3>
@@ -140,7 +140,7 @@
 
     <h2>Ban Message Deletion</h2>
     <p>
-      When a member is banned, Zeppelin automatically deletes the last day of
+      When a member is banned, the app automatically deletes the last day of
       message history. You can extend this through the
       <code>ban_delete_message_days</code> option.
     </p>
