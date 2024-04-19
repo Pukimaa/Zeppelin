@@ -1,6 +1,8 @@
 ![Zeppelin Banner](assets/zepbanner.png)
-# Zeppelin
-Zeppelin is a moderation bot for Discord, designed with large servers and reliability in mind.
+# Zeppelin (Pukima's Fork)
+Zeppelin is a moderation app for Discord, designed with large servers and reliability in mind.
+
+Please note that some branding of this fork has been adjusted to fit Pukima's App called "Moderation", also referenced as "the app".
 
 **Main features include:**
 - Extensive automoderator features (automod)
@@ -17,10 +19,18 @@ Zeppelin is a moderation bot for Discord, designed with large servers and reliab
 - Starboard
 - And more!
 
-See https://zeppelin.gg/ for more details.
+**Custom features added by Pukima:**
+- Slash Commands (by Lily)
+  - Bug fixes and improvements by Pukima
+- Context Menu Apps (by [LilyBergonzat](https://github.com/ZeppelinBot/Zeppelin/pull/455) & [Obliie](https://github.com/ZeppelinBot/Zeppelin/pull/421))
+- Reason Aliases ([metal0](https://github.com/ZeppelinBot/Zeppelin/pull/390))
+  - Bug fix by Pukima
+- Add `log_message_id` to import/export cases ([iamshoXy](https://github.com/ZeppelinBot/Zeppelin/pull/403))
+
+See https://zep.pukima.site/ for more details.
 
 ## Usage documentation
-For information on how to use the bot, see https://zeppelin.gg/docs
+For information on how to use the bot, see https://zep.pukima.site/docs
 
 ## Development
 See [DEVELOPMENT.md](./DEVELOPMENT.md) for instructions on running the development environment.
