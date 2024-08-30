@@ -9,7 +9,7 @@ import { CasesPlugin } from "../../Cases/CasesPlugin.js";
 import { LogsPlugin } from "../../Logs/LogsPlugin.js";
 import { ModActionsPluginType, WarnOptions, WarnResult } from "../types.js";
 import { getDefaultContactMethods } from "./getDefaultContactMethods.js";
-import { parseReason } from "./parseReason.js";}
+import { parseReason } from "./parseReason.js";
 
 export async function warnMember(
   pluginData: GuildPluginData<ModActionsPluginType>,
