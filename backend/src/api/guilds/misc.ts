@@ -1,6 +1,7 @@
 import { ApiPermissions } from "@zeppelinbot/shared/apiPermissions.js";
 import express, { Request, Response } from "express";
-import { YAMLException } from "js-yaml";
+import * as jsYaml from "js-yaml";
+const { YAMLException } = jsYaml;
 import moment from "moment-timezone";
 import { Queue } from "../../Queue.js";
 import { validateGuildConfig } from "../../configValidator.js";
