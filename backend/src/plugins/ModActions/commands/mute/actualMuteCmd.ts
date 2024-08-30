@@ -36,18 +36,19 @@ export async function actualMuteCmd(
   contactMethods?: UserNotificationMethod[],
 ) {
   const config = pluginData.config.get();
+  reason = reason ? parseReason(config, reason) : undefined
 
-  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, parseReason(config, reason))) {
+  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, reason, context,)) {
     return;
   }
 
   const timeUntilUnmute = time && humanizeDuration(time);
   const formattedReason =
     reason || attachments.length > 0
-      ? await formatReasonWithMessageLinkForAttachments(pluginData, parseReason(config, reason) ?? "", context, attachments)
+      ? await formatReasonWithMessageLinkForAttachments(pluginData, reason ?? "", context, attachments)
       : undefined;
   const formattedReasonWithAttachments =
-    reason || attachments.length > 0 ? formatReasonWithAttachments(parseReason(config, reason) ?? "", attachments) : undefined;
+    reason || attachments.length > 0 ? formatReasonWithAttachments(reason ?? "", attachments) : undefined;
 
   let muteResult: MuteResult;
   const mutesPlugin = pluginData.getPlugin(MutesPlugin);
