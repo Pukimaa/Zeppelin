@@ -140,27 +140,12 @@ const defaultOptions = {
   ],
 };
 
-/**
- * Config preprocessor to fix values
- */
-const configPreprocessor = (options) => {
-  if (options.config?.reason_aliases) {
-    options.config.reason_aliases = Object.fromEntries(
-      Object.entries(options.config.reason_aliases).map(([k, v]) => [k.toLowerCase(), v]),
-    );
-  }
-
-  return options;
-};
-
-
 export const ModActionsPlugin = guildPlugin<ModActionsPluginType>()({
   name: "mod_actions",
 
   dependencies: () => [TimeAndDatePlugin, CasesPlugin, MutesPlugin, LogsPlugin],
-  configParser: (input) => zModActionsConfig.parse(input),
+  configParser: (input: any) => zModActionsConfig.parse(input),
   defaultOptions,
-  configPreprocessor,
 
   events: [CreateBanCaseOnManualBanEvt, CreateUnbanCaseOnManualUnbanEvt, PostAlertOnMemberJoinEvt, AuditLogEvents],
 
