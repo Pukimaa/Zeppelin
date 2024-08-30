@@ -38,7 +38,7 @@ export async function actualMuteCmd(
   const config = pluginData.config.get();
   reason = reason ? parseReason(config, reason) : undefined
 
-  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, reason, context,)) {
+  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, reason)) {
     return;
   }
 
