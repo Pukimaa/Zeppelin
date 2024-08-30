@@ -6,7 +6,7 @@ import { MutesPlugin } from "../../../Mutes/MutesPlugin.js";
 import { handleAttachmentLinkDetectionAndGetRestriction } from "../../functions/attachmentLinkReaction.js";
 import { formatReasonWithMessageLinkForAttachments } from "../../functions/formatReasonForAttachments.js";
 import { ModActionsPluginType } from "../../types.js";
-import { parseReason } from "plugins/ModActions/functions/parseReason.js";
+import { parseReason } from "../../functions/parseReason.js";
 
 export async function actualUnmuteCmd(
   pluginData: GuildPluginData<ModActionsPluginType>,
