@@ -55,6 +55,7 @@ export const zModActionsConfig = z.strictObject({
   can_deletecase: z.boolean(),
   can_act_as_other: z.boolean(),
   create_cases_for_manual_actions: z.boolean(),
+  reason_aliases: z.nullable(z.record(z.string(), z.string())),
 });
 
 export interface ModActionsEvents {
@@ -103,36 +104,36 @@ export interface IIgnoredEvent {
 
 export type WarnResult =
   | {
-      status: "failed";
-      error: string;
-    }
+    status: "failed";
+    error: string;
+  }
   | {
-      status: "success";
-      case: Case;
-      notifyResult: UserNotificationResult;
-    };
+    status: "success";
+    case: Case;
+    notifyResult: UserNotificationResult;
+  };
 
 export type KickResult =
   | {
-      status: "failed";
-      error: string;
-    }
+    status: "failed";
+    error: string;
+  }
   | {
-      status: "success";
-      case: Case;
-      notifyResult: UserNotificationResult;
-    };
+    status: "success";
+    case: Case;
+    notifyResult: UserNotificationResult;
+  };
 
 export type BanResult =
   | {
-      status: "failed";
-      error: string;
-    }
+    status: "failed";
+    error: string;
+  }
   | {
-      status: "success";
-      case: Case;
-      notifyResult: UserNotificationResult;
-    };
+    status: "success";
+    case: Case;
+    notifyResult: UserNotificationResult;
+  };
 
 export type WarnMemberNotifyRetryCallback = () => boolean | Promise<boolean>;
 

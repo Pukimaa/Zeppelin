@@ -8,6 +8,7 @@ import { CasesPlugin } from "../../../Cases/CasesPlugin.js";
 import { LogsPlugin } from "../../../Logs/LogsPlugin.js";
 import { handleAttachmentLinkDetectionAndGetRestriction } from "../../functions/attachmentLinkReaction.js";
 import { formatReasonWithMessageLinkForAttachments } from "../../functions/formatReasonForAttachments.js";
+import { parseReason } from "../../functions/parseReason.js";
 import { ModActionsPluginType } from "../../types.js";
 
 export async function actualAddCaseCmd(
@@ -31,7 +32,8 @@ export async function actualAddCaseCmd(
     return;
   }
 
-  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, reason, context, attachments);
+  const config = pluginData.config.get();
+  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, parseReason(config, reason), context, attachments)
 
   // Create the case
   const casesPlugin = pluginData.getPlugin(CasesPlugin);

@@ -18,6 +18,7 @@ import {
   formatReasonWithMessageLinkForAttachments,
 } from "../../functions/formatReasonForAttachments.js";
 import { ModActionsPluginType } from "../../types.js";
+import { parseReason } from "../../functions/parseReason.js";
 
 /**
  * The actual function run by both !mute and !forcemute.
@@ -34,17 +35,19 @@ export async function actualMuteCmd(
   reason?: string | null,
   contactMethods?: UserNotificationMethod[],
 ) {
-  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, reason)) {
+  const config = pluginData.config.get();
+
+  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, parseReason(config, reason))) {
     return;
   }
 
   const timeUntilUnmute = time && humanizeDuration(time);
   const formattedReason =
     reason || attachments.length > 0
-      ? await formatReasonWithMessageLinkForAttachments(pluginData, reason ?? "", context, attachments)
+      ? await formatReasonWithMessageLinkForAttachments(pluginData, parseReason(config, reason) ?? "", context, attachments)
       : undefined;
   const formattedReasonWithAttachments =
-    reason || attachments.length > 0 ? formatReasonWithAttachments(reason ?? "", attachments) : undefined;
+    reason || attachments.length > 0 ? formatReasonWithAttachments(parseReason(config, reason) ?? "", attachments) : undefined;
 
   let muteResult: MuteResult;
   const mutesPlugin = pluginData.getPlugin(MutesPlugin);

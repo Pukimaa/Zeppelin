@@ -12,6 +12,7 @@ import {
 } from "../../functions/formatReasonForAttachments.js";
 import { ignoreEvent } from "../../functions/ignoreEvent.js";
 import { IgnoredEventType, ModActionsPluginType } from "../../types.js";
+import { parseReason } from "../../functions/parseReason.js";
 
 export async function actualForceBanCmd(
   pluginData: GuildPluginData<ModActionsPluginType>,
@@ -26,8 +27,9 @@ export async function actualForceBanCmd(
     return;
   }
 
-  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, reason, context, attachments);
-  const formattedReasonWithAttachments = formatReasonWithAttachments(reason, attachments);
+  const config = pluginData.config.get();
+  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, parseReason(config, reason), context, attachments)
+  const formattedReasonWithAttachments = formatReasonWithAttachments(parseReason(config, reason), attachments);
 
   ignoreEvent(pluginData, IgnoredEventType.Ban, user.id);
   pluginData.state.serverLogs.ignoreLog(LogType.MEMBER_BAN, user.id);

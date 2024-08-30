@@ -10,6 +10,7 @@ import { handleAttachmentLinkDetectionAndGetRestriction } from "../../functions/
 import { formatReasonWithMessageLinkForAttachments } from "../../functions/formatReasonForAttachments.js";
 import { ignoreEvent } from "../../functions/ignoreEvent.js";
 import { IgnoredEventType, ModActionsPluginType } from "../../types.js";
+import { parseReason } from "../../functions/parseReason.js";
 
 export async function actualUnbanCmd(
   pluginData: GuildPluginData<ModActionsPluginType>,
@@ -20,12 +21,14 @@ export async function actualUnbanCmd(
   attachments: Array<Attachment>,
   mod: GuildMember,
 ) {
-  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, reason)) {
+  const config = pluginData.config.get();
+
+  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, parseReason(config, reason))) {
     return;
   }
 
   pluginData.state.serverLogs.ignoreLog(LogType.MEMBER_UNBAN, user.id);
-  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, reason, context, attachments);
+  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, parseReason(config, reason), context, attachments);
 
   try {
     ignoreEvent(pluginData, IgnoredEventType.Unban, user.id);

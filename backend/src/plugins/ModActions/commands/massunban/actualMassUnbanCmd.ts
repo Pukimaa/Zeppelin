@@ -11,6 +11,7 @@ import { formatReasonWithMessageLinkForAttachments } from "../../functions/forma
 import { ignoreEvent } from "../../functions/ignoreEvent.js";
 import { isBanned } from "../../functions/isBanned.js";
 import { IgnoredEventType, ModActionsPluginType } from "../../types.js";
+import { parseReason } from "../../functions/parseReason.js";
 
 export async function actualMassUnbanCmd(
   pluginData: GuildPluginData<ModActionsPluginType>,
@@ -26,11 +27,13 @@ export async function actualMassUnbanCmd(
     return;
   }
 
-  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, reason)) {
+  const config = pluginData.config.get();
+
+  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, parseReason(config, reason))) {
     return;
   }
 
-  const unbanReason = await formatReasonWithMessageLinkForAttachments(pluginData, reason, context, attachments);
+  const unbanReason = await formatReasonWithMessageLinkForAttachments(pluginData, parseReason(config, reason), context, attachments);
 
   // Ignore automatic unban cases and logs for these users
   // We'll create our own cases below and post a single "mass unbanned" log instead

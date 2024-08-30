@@ -12,6 +12,7 @@ import { ignoreEvent } from "../../functions/ignoreEvent.js";
 import { isBanned } from "../../functions/isBanned.js";
 import { kickMember } from "../../functions/kickMember.js";
 import { IgnoredEventType, ModActionsPluginType } from "../../types.js";
+import { parseReason } from "../../functions/parseReason.js";
 
 export async function actualKickCmd(
   pluginData: GuildPluginData<ModActionsPluginType>,
@@ -24,7 +25,9 @@ export async function actualKickCmd(
   contactMethods?: UserNotificationMethod[],
   clean?: boolean | null,
 ) {
-  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, reason)) {
+  const config = pluginData.config.get();
+
+  if (await handleAttachmentLinkDetectionAndGetRestriction(pluginData, context, parseReason(config, reason))) {
     return;
   }
 
@@ -47,8 +50,8 @@ export async function actualKickCmd(
     return;
   }
 
-  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, reason, context, attachments);
-  const formattedReasonWithAttachments = formatReasonWithAttachments(reason, attachments);
+  const formattedReason = await formatReasonWithMessageLinkForAttachments(pluginData, parseReason(config, reason), context, attachments);
+  const formattedReasonWithAttachments = formatReasonWithAttachments(parseReason(config, reason), attachments);
 
   const kickResult = await kickMember(pluginData, memberToKick, formattedReason, formattedReasonWithAttachments, {
     contactMethods,
